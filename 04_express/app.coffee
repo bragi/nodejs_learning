@@ -1,8 +1,4 @@
-express = require("express")
-jade = require("jade")
-
-# Business logic
-
+# Model
 
 class Node
   constructor: (@id, @title, @text) ->
@@ -41,6 +37,8 @@ right.addExit("Go left", left)
 
 # View
 
+jade = require("jade")
+
 class NodeView
   constructor: (@node) ->
     
@@ -71,7 +69,7 @@ p
 ul
   - exits.forEach(function(exit) {
     li
-      a(href=exit[1])= exit[0]
+      a(href=exit[0])= exit[1]
   - })
     '''
     locals =
@@ -87,3 +85,16 @@ ul
   html: ->
     jade.render(this.template, this.locals())
 
+
+# Controller
+
+app = require("express").createServer()
+
+app.get "/", (request, response) ->
+  response.send(new NodeView(start).html)
+
+app.get "/nodes/:id", (request, response) ->
+  response.send(new NodeView(nodes.find(request.params.id)).html)
+  #response.send(request.params)
+
+app.listen(3000)
