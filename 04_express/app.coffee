@@ -55,6 +55,9 @@ html
     p #{text}
     p #{exitsOrCongratulations}
     '''
+  exits: ->
+    for exit in @node.exits
+      ['/nodes/' + exit[1].id, exit[0]]
 
   exitsOrCongratulations: ->
     text = if @node.finish()
@@ -68,12 +71,12 @@ p
 ul
   - exits.forEach(function(exit) {
     li
-      a(href='/node/#{exit[1].id}') #{exit[0]}
+      a(href=exit[1])= exit[0]
   - })
     '''
     locals =
       locals:
-        exits: @node.exits
+        exits: this.exits()
     console.log locals
     jade.render(text, locals)
   locals: ->
