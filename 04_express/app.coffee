@@ -77,7 +77,6 @@ ul
     locals =
       locals:
         exits: this.exits()
-    console.log locals
     jade.render(text, locals)
   locals: ->
     locals:
@@ -88,4 +87,3 @@ ul
   html: ->
     jade.render(this.template, this.locals())
 
-console.log new NodeView(start).html
