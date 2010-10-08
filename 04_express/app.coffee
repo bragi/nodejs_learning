@@ -1,13 +1,16 @@
+express = require("express")
+jade = require("jade")
+
+# Business logic
+
+
 class Node
   constructor: (@id, @title, @text) ->
-    @exit_count = 0
-    @exits = {}
+    @exits = []
   addExit: (text, node) ->
-    @exit_count ++
-    @exits[text] = node
+    @exits.push([text, node])
   finish: ->
-    @exit_count == 0
-  
+    @exits.length == 0
 
 class Nodes
   constructor: ->
@@ -36,3 +39,50 @@ left.addExit("Go right", right)
 right.addExit("Go straight", finish)
 right.addExit("Go left", left)
 
+# View
+
+class NodeView
+  constructor: (@node) ->
+    
+  template:
+    '''
+!!! 5
+html
+  head
+    title #{title}
+  body
+    h1 #{title}
+    p #{text}
+    p #{exitsOrCongratulations}
+    '''
+
+  exitsOrCongratulations: ->
+    text = if @node.finish()
+      '''
+p YOU'RE WINNER !
+p
+  a(href='/') Start again
+    '''
+    else
+      '''
+ul
+  - exits.forEach(function(exit) {
+    li
+      a(href='/node/#{exit[1].id}') #{exit[0]}
+  - })
+    '''
+    locals =
+      locals:
+        exits: @node.exits
+    console.log locals
+    jade.render(text, locals)
+  locals: ->
+    locals:
+      title: @node.title
+      text: @node.text
+      exitsOrCongratulations: this.exitsOrCongratulations()
+      
+  html: ->
+    jade.render(this.template, this.locals())
+
+console.log new NodeView(start).html
