@@ -1,3 +1,12 @@
+# Simple labyrinth game implemented as web application running at http://localhost:4567/
+#
+# Starting on a home page it presents user with a short description of his
+# locations and available paths he can take (as links).
+#
+# When gamer gets to last location he is presented with a "YOU'RE WINNER !"
+# congratulations text.
+#
+
 # Model
 
 class Node
@@ -95,6 +104,5 @@ app.get "/", (request, response) ->
 
 app.get "/nodes/:id", (request, response) ->
   response.send(new NodeView(nodes.find(request.params.id)).html)
-  #response.send(request.params)
 
 app.listen(3000)
