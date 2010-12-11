@@ -9,11 +9,14 @@
 
 # Model
 
+class Exit
+  constructor: (@text, @node) ->
+
 class Node
   constructor: (@id, @title, @text) ->
     @exits = []
   addExit: (text, node) ->
-    @exits.push([text, node])
+    @exits.push(new Exit(text, node))
   finish: ->
     @exits.length == 0
 
@@ -44,65 +47,29 @@ left.addExit("Go right", right)
 right.addExit("Go straight", finish)
 right.addExit("Go left", left)
 
+def nodes: nodes
+def start: start
 # View
 
-jade = require("jade")
+layout ->
+  html ->
+    head -> title @node.title
+  body -> @content
 
-class NodeView
-  constructor: (@node) ->
-    
-  template:
-    '''
-!!! 5
-html
-  head
-    title #{title}
-  body
-    h1 #{title}
-    p #{text}
-    p #{exitsOrCongratulations}
-    '''
-  exits: ->
-    for exit in @node.exits
-      ['/nodes/' + exit[1].id, exit[0]]
+view node: ->
+  h1 @node.title
+  if @node.finish()
+    p "YOU'RE WINNER !"
+    p -> a href: "/", -> "Start again"
+  else
+    ul ->
+      for exit in @node.exits
+        li -> a href: "/nodes/" + exit.node.id, -> exit.text
 
-  exitsOrCongratulations: ->
-    text = if @node.finish()
-      '''
-p YOU'RE WINNER !
-p
-  a(href='/') Start again
-    '''
-    else
-      '''
-ul
-  - exits.forEach(function(exit) {
-    li
-      a(href=exit[0])= exit[1]
-  - })
-    '''
-    locals =
-      locals:
-        exits: this.exits()
-    jade.render(text, locals)
-  locals: ->
-    locals:
-      title: @node.title
-      text: @node.text
-      exitsOrCongratulations: this.exitsOrCongratulations()
-      
-  html: ->
-    jade.render(this.template, this.locals())
+get "/", ->
+  @node = start
+  render 'node'
 
-
-# Controller
-
-app = require("express").createServer()
-
-app.get "/", (request, response) ->
-  response.send(new NodeView(start).html)
-
-app.get "/nodes/:id", (request, response) ->
-  response.send(new NodeView(nodes.find(request.params.id)).html)
-
-app.listen(3000)
+get "/nodes/:id", ->
+  @node = nodes.find(@id)
+  render 'node'
